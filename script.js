@@ -1,7 +1,5 @@
-
-
 const API_KEY = "AIzaSyDMWjtHM19Ncp0Kll2v33cak6L_dVhvJwQ";
-const MODEL = "gemini-pro";   // shows which model is used
+const MODEL = "gemini-pro";
 
 const sendBtn = document.getElementById("send-btn");
 const input = document.getElementById("user-input");
@@ -63,11 +61,14 @@ async function sendMessage() {
     }
 
     const data = await res.json();
-    const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text || "⚠ No response";
+
+    const reply =
+      data?.candidates?.[0]?.content?.parts?.[0]?.text ||
+      "⚠ No response";
 
     addMessage("[" + MODEL + "]\n" + reply, "bot");
 
-  } catch (error) {
+  } catch {
     removeTyping();
     addMessage("❌ Network Error", "bot");
   }
