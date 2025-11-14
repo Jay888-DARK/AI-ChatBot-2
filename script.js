@@ -1,77 +1,42 @@
-const API_KEY = "AIzaSyBavYtQlxO1IWenbVzHXnB7HsBtUw33BT0";
-const MODEL = "gemini-pro";
-
-const sendBtn = document.getElementById("send-btn");
-const input = document.getElementById("user-input");
-const chatBox = document.getElementById("chat-box");
-
-sendBtn.addEventListener("click", sendMessage);
-input.addEventListener("keypress", (e) => {
-  if (e.key === "Enter") sendMessage();
-});
-
-function addMessage(text, sender) {
-  const bubble = document.createElement("div");
-  bubble.className = sender;
-  bubble.innerText = text;
-  chatBox.appendChild(bubble);
-  chatBox.scrollTop = chatBox.scrollHeight;
-}
-
-function addTyping() {
-  const bubble = document.createElement("div");
-  bubble.className = "bot typing";
-  bubble.innerText = "Gemini is typing…";
-  bubble.id = "typing";
-  chatBox.appendChild(bubble);
-  chatBox.scrollTop = chatBox.scrollHeight;
-}
-
-function removeTyping() {
-  const typing = document.getElementById("typing");
-  if (typing) typing.remove();
-}
-
 async function sendMessage() {
-  const text = input.value.trim();
-  if (!text) return;
+    const apiKey = "AIzaSyAsedAXzWrXEBEOBdY09Xh7xfQ7wggvjqw";
+    const userInput = document.getElementById("userInput").value;
+    if (!userInput) return;
 
-  addMessage(text, "user");
-  input.value = "";
+    addMessage("user", userInput);
+    document.getElementById("userInput").value = "";
 
-  addTyping();
-
-  try {
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${API_KEY}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text }] }]
-        })
-      }
+    const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+        {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                contents: [{
+                    parts: [{ text: userInput }]
+                }]
+            })
+        }
     );
 
-    removeTyping();
+    const result = await response.json();
 
-    if (!res.ok) {
-      addMessage("❌ API Error: " + res.statusText, "bot");
-      return;
+    try {
+        const botReply =
+            result.candidates?.[0]?.content?.parts?.[0]?.text ||
+            "⚠️ API Error: No response";
+
+        addMessage("bot", botReply);
+    } catch (e) {
+        addMessage("bot", "⚠️ Error reading response");
     }
-
-    const data = await res.json();
-
-    const reply =
-      data?.candidates?.[0]?.content?.parts?.[0]?.text ||
-      "⚠ No response";
-
-    addMessage("[" + MODEL + "]\n" + reply, "bot");
-
-  } catch {
-    removeTyping();
-    addMessage("❌ Network Error", "bot");
-  }
 }
 
-
+function addMessage(sender, text) {
+    const chatbox = document.getElementById("chatbox");
+    const msg = document.createElement("div");
+    msg.className = sender;
+    msg.innerText = (sender === "user" ? "🧑 You: " : "🤖 Bot: ") + text;
+    chatbox.appendChild(msg);
+    chatbox.scrollTop = chatbox.scrollHeight;
+}
