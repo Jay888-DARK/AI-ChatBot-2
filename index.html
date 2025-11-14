@@ -3,17 +3,20 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Gemini Chatbot</title>
+    <title>Gemini ChatGPT</title>
     <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-    <div class="chat-container">
-        <div id="chat-box" class="chat-box"></div>
 
-        <div class="input-area">
-            <input id="user-input" type="text" placeholder="Message Gemini…" />
-            <button id="send-btn">➤</button>
-        </div>
+    <div class="header">
+        <h1>Gemini Chat</h1>
+    </div>
+
+    <div class="chat-window" id="chat-window"></div>
+
+    <div class="input-bar">
+        <input type="text" id="user-input" placeholder="Send a message..." />
+        <button id="send-btn">Send</button>
     </div>
 
     <script src="script.js"></script>
