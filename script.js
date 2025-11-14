@@ -1,77 +1,90 @@
-body {
-    margin: 0;
-    font-family: "Segoe UI", sans-serif;
-    background: #0f0f0f;
-    color: white;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
+// ⭐ Put your real Gemini API key
+const API_KEY = "AIzaSyDMWjtHM19Ncp0Kll2v33cak6L_dVhvJwQ";
+
+// ⭐ Gemini model
+const MODEL = "gemini-1.5-flash";
+const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${API_KEY}`;
+
+console.log("Model Loaded:", MODEL);
+
+const chatWindow = document.getElementById("chat-window");
+const input = document.getElementById("user-input");
+const sendBtn = document.getElementById("send-btn");
+
+// Add message to UI
+function addMessage(text, sender) {
+    const msg = document.createElement("div");
+    msg.classList.add("message", sender);
+    msg.textContent = text;
+    chatWindow.appendChild(msg);
+    chatWindow.scrollTop = chatWindow.scrollHeight;
 }
 
-.header {
-    text-align: center;
-    padding: 20px;
-    font-size: 28px;
-    font-weight: bold;
-    background: #1a1a1a;
-    border-bottom: 1px solid #333;
+// Typing animation
+function showTyping() {
+    const typing = document.createElement("div");
+    typing.id = "typing";
+    typing.classList.add("typing");
+    typing.innerText = "Gemini is typing...";
+    chatWindow.appendChild(typing);
+    chatWindow.scrollTop = chatWindow.scrollHeight;
 }
 
-.chat-window {
-    flex: 1;
-    padding: 20px;
-    overflow-y: scroll;
+function removeTyping() {
+    const typing = document.getElementById("typing");
+    if (typing) typing.remove();
 }
 
-.message {
-    max-width: 70%;
-    padding: 12px 16px;
-    margin: 10px 0;
-    border-radius: 12px;
-    font-size: 16px;
-    line-height: 1.4;
+// Send message to Gemini
+async function sendMessage() {
+    const text = input.value.trim();
+    if (text === "") return;
+
+    addMessage(text, "user");
+    input.value = "";
+
+    showTyping();
+
+    try {
+        const body = {
+            contents: [
+                {
+                    parts: [{ text }]
+                }
+            ]
+        };
+
+        const response = await fetch(API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body)
+        });
+
+        const json = await response.json();
+        removeTyping();
+
+        if (json.error) {
+            addMessage("❌ Error: " + json.error.message, "bot");
+            return;
+        }
+
+        const output = json.candidates?.[0]?.content?.parts?.[0]?.text;
+
+        if (output) {
+            addMessage(output, "bot");
+        } else {
+            addMessage("⚠ No Response from Gemini", "bot");
+        }
+
+    } catch (err) {
+        removeTyping();
+        addMessage("⚠ Network Error: " + err.message, "bot");
+    }
 }
 
-.bot {
-    background: #1f1f1f;
-    border-left: 4px solid #4e9eff;
-}
+// Event Listeners
+sendBtn.addEventListener("click", sendMessage);
 
-.user {
-    background: #005fff;
-    margin-left: auto;
-    border-right: 4px solid #0041b3;
-}
-
-.input-bar {
-    padding: 15px;
-    background: #1a1a1a;
-    display: flex;
-    gap: 10px;
-}
-
-#user-input {
-    flex: 1;
-    padding: 12px;
-    border-radius: 8px;
-    border: none;
-    outline: none;
-    background: #101010;
-    color: white;
-}
-
-#send-btn {
-    padding: 12px 20px;
-    border-radius: 8px;
-    border: none;
-    cursor: pointer;
-    background: #005fff;
-    color: white;
-    font-size: 16px;
-}
-
-.typing {
-    color: #888;
-    font-style: italic;
-    padding-left: 10px;
-}
+input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") sendMessage();
+});
