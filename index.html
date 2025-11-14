@@ -1,21 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Gemini Chat</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Gemini Chat — GPT UI</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <div class="app">
+    <aside class="sidebar">
+      <h2>Gemini Chat</h2>
+      <div class="info">
+        <p>Model: <span id="model-name">loading…</span></p>
+        <p id="status">Status: <span class="ok">ready</span></p>
+      </div>
+      <footer class="footer">Demo — do not expose keys in production</footer>
+    </aside>
 
-  <div class="chat-container">
-    <h1>Gemini Chat</h1>
+    <main class="main">
+      <div id="chat-box" class="chat-box" aria-live="polite"></div>
 
-    <div id="chat-box"></div>
-
-    <div class="input-area">
-      <input id="user-input" type="text" placeholder="Ask something..." />
-      <button id="send-btn">Send</button>
-    </div>
+      <div class="composer">
+        <input id="user-input" type="text" placeholder="Ask anything..." autocomplete="off" />
+        <button id="send-btn" aria-label="Send">Send</button>
+      </div>
+    </main>
   </div>
 
   <script src="script.js"></script>
