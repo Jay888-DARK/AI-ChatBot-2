@@ -1,3 +1,6 @@
+console.log("API KEY:", API_KEY);
+console.log("API URL:", API_URL);
+
 const API_KEY = "AIzaSyDMWjtHM19Ncp0Kll2v33cak6L_dVhvJwQ";
 const API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=" + API_KEY;
 
@@ -58,3 +61,4 @@ sendBtn.addEventListener("click", sendMessage);
 input.addEventListener("keypress", e => {
     if (e.key === "Enter") sendMessage();
 });
+
