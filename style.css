@@ -1,46 +1,98 @@
-body {
-    background: #f0f0f0;
-    font-family: Arial, sans-serif;
+// 🔐 Put your API key here
+const API_KEY = "AIzaSyDMWjtHM19Ncp0Kll2v33cak6L_dVhvJwQ";  
+
+// 🧠 Correct model + endpoint
+const MODEL = "gemini-1.5-flash";   
+const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${API_KEY}`;
+
+console.log("🔍 Using model:", MODEL); // 👈 prints model in console
+
+// ------------------------------------
+// Add message to chat UI
+// ------------------------------------
+function addMessage(text, sender) {
+    const chatBox = document.getElementById("chat-box");
+    const msg = document.createElement("div");
+    msg.className = `message ${sender}`;
+    msg.innerText = text;
+    chatBox.appendChild(msg);
+    chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-.container {
-    width: 450px;
-    margin: 40px auto;
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
+// ------------------------------------
+// Typing animation
+// ------------------------------------
+function showTyping() {
+    const chatBox = document.getElementById("chat-box");
+    const typing = document.createElement("div");
+    typing.id = "typing";
+    typing.className = "message bot";
+    typing.innerText = "Gemini is typing...";
+    chatBox.appendChild(typing);
+    chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-.chat-box {
-    height: 400px;
-    overflow-y: scroll;
-    border: 1px solid #ddd;
-    padding: 10px;
-    margin-bottom: 15px;
-    background: #fafafa;
+function removeTyping() {
+    const t = document.getElementById("typing");
+    if (t) t.remove();
 }
 
-.user {
-    text-align: right;
-    margin: 10px;
-    color: blue;
+// ------------------------------------
+// Send request to Gemini
+// ------------------------------------
+async function sendMessage() {
+    const input = document.getElementById("user-input");
+    const text = input.value.trim();
+    if (!text) return;
+
+    addMessage(text, "user");
+    input.value = "";
+
+    showTyping();
+
+    try {
+        const body = {
+            contents: [
+                {
+                    parts: [{ text: text }]
+                }
+            ]
+        };
+
+        const res = await fetch(API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body)
+        });
+
+        const data = await res.json();
+        removeTyping();
+
+        // Handle common errors
+        if (data.error) {
+            addMessage("Error: " + data.error.message, "bot");
+            return;
+        }
+
+        const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+
+        if (reply) {
+            addMessage(reply, "bot");
+        } else {
+            addMessage("⚠ No response (model returned empty output)", "bot");
+        }
+
+    } catch (err) {
+        removeTyping();
+        addMessage("❌ Network error: " + err.message, "bot");
+    }
 }
 
-.bot {
-    text-align: left;
-    margin: 10px;
-    color: green;
-}
+// ------------------------------------
+// Button + Enter key
+// ------------------------------------
+document.getElementById("send-btn").onclick = sendMessage;
 
-.input-area {
-    display: flex;
-}
-
-input {
-    flex: 1;
-    padding: 10px;
-}
-
-button {
-    padding: 10px 15px;
-}
+document.getElementById("user-input").addEventListener("keydown", function (e) {
+    if (e.key === "Enter") sendMessage();
+});
