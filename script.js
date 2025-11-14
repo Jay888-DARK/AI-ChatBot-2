@@ -1,4 +1,4 @@
-const API_KEY = "AIzaSyDMWjtHM19Ncp0Kll2v33cak6L_dVhvJwQ";
+const API_KEY = "AIzaSyAsedAXzWrXEBEOBdY09Xh7xfQ7wggvjqw";
 const MODEL = "gemini-pro";
 
 const sendBtn = document.getElementById("send-btn");
@@ -73,3 +73,4 @@ async function sendMessage() {
     addMessage("❌ Network Error", "bot");
   }
 }
+
