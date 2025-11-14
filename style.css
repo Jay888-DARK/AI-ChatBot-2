@@ -1,80 +1,31 @@
-const API_KEY = "AIzaSyAsedAXzWrXEBEOBdY09Xh7xfQ7wggvjqw";
-const MODEL = "gemini-1.5-flash";
-
-const sendBtn = document.getElementById("send-btn");
-const input = document.getElementById("user-input");
-const chatBox = document.getElementById("chat-box");
-
-sendBtn.addEventListener("click", sendMessage);
-input.addEventListener("keypress", (e) => {
-  if (e.key === "Enter") sendMessage();
-});
-
-function addMessage(text, sender) {
-  const bubble = document.createElement("div");
-  bubble.className = sender;
-  bubble.innerText = text;
-  chatBox.appendChild(bubble);
-  chatBox.scrollTop = chatBox.scrollHeight;
+:root{
+  --bg:#0b0b0c; --panel:#101214; --muted:#9aa4b2; --accent:#06f; --user:#1766ff;
+  --bot:#1f1f23; --glass: rgba(255,255,255,0.03);
 }
-
-function addTyping() {
-  const bubble = document.createElement("div");
-  bubble.className = "bot typing";
-  bubble.id = "typing";
-  bubble.innerText = "Gemini is typing…";
-  chatBox.appendChild(bubble);
-  chatBox.scrollTop = chatBox.scrollHeight;
+*{box-sizing:border-box}
+html,body{height:100%; margin:0; background:var(--bg); color:#e6eef8; font-family:Inter,ui-sans-serif,system-ui,Segoe UI,Roboto,Arial;}
+.app{display:flex; height:100vh; gap:18px; padding:18px;}
+.sidebar{
+  width:260px; background:linear-gradient(180deg,var(--panel),#0e0f11);
+  border-radius:12px; padding:18px; display:flex; flex-direction:column; justify-content:space-between;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.6);
 }
+.sidebar h2{margin:0 0 8px 0; font-size:20px; color:var(--accent)}
+.info p{margin:8px 0; color:var(--muted); font-size:13px}
+.footer{font-size:12px; color:#7d8794}
 
-function removeTyping() {
-  const typing = document.getElementById("typing");
-  if (typing) typing.remove();
-}
+.main{flex:1; display:flex; flex-direction:column; border-radius:12px; overflow:hidden; background:linear-gradient(180deg,var(--bot),#0f1113); box-shadow:0 6px 30px rgba(0,0,0,0.6)}
+.chat-box{flex:1; padding:18px; overflow-y:auto; display:flex; flex-direction:column; gap:10px;}
+.message{max-width:78%; padding:12px 14px; border-radius:12px; line-height:1.4; word-break:break-word; white-space:pre-wrap;}
+.msg-user{margin-left:auto; background:linear-gradient(90deg,var(--user),#0053d6); color:#fff; border-bottom-right-radius:4px;}
+.msg-bot{margin-right:auto; background:var(--glass); color:#dbe9ff; border-bottom-left-radius:4px; border:1px solid rgba(255,255,255,0.03)}
+.meta{font-size:12px; opacity:0.8; margin-top:6px; color:var(--muted)}
 
-async function sendMessage() {
-  const text = input.value.trim();
-  if (!text) return;
+.composer{display:flex; gap:12px; padding:14px; border-top:1px solid rgba(255,255,255,0.02); background:linear-gradient(180deg,#080809,#0b0c0d)}
+#user-input{flex:1; padding:12px 14px; border-radius:10px; background:#0a0a0b; color:#fff; border:1px solid rgba(255,255,255,0.03); outline:none}
+#user-input::placeholder{color:#6f7b89}
+#send-btn{background:var(--accent); color:#001; border:none; padding:10px 16px; border-radius:10px; cursor:pointer; font-weight:700}
 
-  addMessage(text, "user");
-  input.value = "";
-
-  addTyping();
-
-  try {
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${API_KEY}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [
-            {
-              role: "user",
-              parts: [{ text }]
-            }
-          ]
-        })
-      }
-    );
-
-    removeTyping();
-
-    if (!res.ok) {
-      addMessage("❌ API Error: " + res.status + " " + res.statusText, "bot");
-      return;
-    }
-
-    const data = await res.json();
-
-    const reply =
-      data?.candidates?.[0]?.content?.parts?.[0]?.text ||
-      "⚠ No response";
-
-    addMessage(`🤖 [${MODEL}]\n${reply}`, "bot");
-
-  } catch (e) {
-    removeTyping();
-    addMessage("❌ Network Error", "bot");
-  }
-}
+.typing{font-style:italic; opacity:0.85; color:var(--muted); padding:10px 14px; border-radius:10px; background:rgba(255,255,255,0.02)}
+.small{font-size:12px; color:var(--muted)}
+@media(max-width:900px){.app{flex-direction:column}.sidebar{width:100%; order:2}.main{order:1}}
