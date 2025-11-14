@@ -1,90 +1,74 @@
-// ⭐ Put your real Gemini API key
+
+
 const API_KEY = "AIzaSyDMWjtHM19Ncp0Kll2v33cak6L_dVhvJwQ";
+const MODEL = "gemini-pro";   // shows which model is used
 
-// ⭐ Gemini model
-const MODEL = "gemini-1.5-flash";
-const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${API_KEY}`;
-
-console.log("Model Loaded:", MODEL);
-
-const chatWindow = document.getElementById("chat-window");
-const input = document.getElementById("user-input");
 const sendBtn = document.getElementById("send-btn");
+const input = document.getElementById("user-input");
+const chatBox = document.getElementById("chat-box");
 
-// Add message to UI
+sendBtn.addEventListener("click", sendMessage);
+input.addEventListener("keypress", (e) => {
+  if (e.key === "Enter") sendMessage();
+});
+
 function addMessage(text, sender) {
-    const msg = document.createElement("div");
-    msg.classList.add("message", sender);
-    msg.textContent = text;
-    chatWindow.appendChild(msg);
-    chatWindow.scrollTop = chatWindow.scrollHeight;
+  const bubble = document.createElement("div");
+  bubble.className = sender;
+  bubble.innerText = text;
+  chatBox.appendChild(bubble);
+  chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-// Typing animation
-function showTyping() {
-    const typing = document.createElement("div");
-    typing.id = "typing";
-    typing.classList.add("typing");
-    typing.innerText = "Gemini is typing...";
-    chatWindow.appendChild(typing);
-    chatWindow.scrollTop = chatWindow.scrollHeight;
+function addTyping() {
+  const bubble = document.createElement("div");
+  bubble.className = "bot typing";
+  bubble.innerText = "Gemini is typing…";
+  bubble.id = "typing";
+  chatBox.appendChild(bubble);
+  chatBox.scrollTop = chatBox.scrollHeight;
 }
 
 function removeTyping() {
-    const typing = document.getElementById("typing");
-    if (typing) typing.remove();
+  const typing = document.getElementById("typing");
+  if (typing) typing.remove();
 }
 
-// Send message to Gemini
 async function sendMessage() {
-    const text = input.value.trim();
-    if (text === "") return;
+  const text = input.value.trim();
+  if (!text) return;
 
-    addMessage(text, "user");
-    input.value = "";
+  addMessage(text, "user");
+  input.value = "";
 
-    showTyping();
+  addTyping();
 
-    try {
-        const body = {
-            contents: [
-                {
-                    parts: [{ text }]
-                }
-            ]
-        };
+  try {
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${API_KEY}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text }] }]
+        })
+      }
+    );
 
-        const response = await fetch(API_URL, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(body)
-        });
+    removeTyping();
 
-        const json = await response.json();
-        removeTyping();
-
-        if (json.error) {
-            addMessage("❌ Error: " + json.error.message, "bot");
-            return;
-        }
-
-        const output = json.candidates?.[0]?.content?.parts?.[0]?.text;
-
-        if (output) {
-            addMessage(output, "bot");
-        } else {
-            addMessage("⚠ No Response from Gemini", "bot");
-        }
-
-    } catch (err) {
-        removeTyping();
-        addMessage("⚠ Network Error: " + err.message, "bot");
+    if (!res.ok) {
+      addMessage("❌ API Error: " + res.statusText, "bot");
+      return;
     }
+
+    const data = await res.json();
+    const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text || "⚠ No response";
+
+    addMessage("[" + MODEL + "]\n" + reply, "bot");
+
+  } catch (error) {
+    removeTyping();
+    addMessage("❌ Network Error", "bot");
+  }
 }
-
-// Event Listeners
-sendBtn.addEventListener("click", sendMessage);
-
-input.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") sendMessage();
-});
