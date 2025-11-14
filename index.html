@@ -1,24 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Gemini ChatGPT</title>
-    <link rel="stylesheet" href="styles.css" />
+  <meta charset="UTF-8" />
+  <title>Gemini Chat</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-    <div class="header">
-        <h1>Gemini Chat</h1>
+  <div class="chat-container">
+    <h1>Gemini Chat</h1>
+    <div id="chat-box"></div>
+
+    <div class="input-area">
+      <input id="user-input" type="text" placeholder="Ask something..." />
+      <button id="send-btn">Send</button>
     </div>
+  </div>
 
-    <div class="chat-window" id="chat-window"></div>
-
-    <div class="input-bar">
-        <input type="text" id="user-input" placeholder="Send a message..." />
-        <button id="send-btn">Send</button>
-    </div>
-
-    <script src="script.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
